@@ -1,3 +1,30 @@
 #!/usr/bin/env ruby
+require 'thor'
 
 require "docker_pid"
+
+module DockerPid
+  class CLI < Thor
+    include Thor::Actions
+
+    desc "container PID", "find container id from PID"
+    option :verbose, type: :boolean, default: false, aliases: "-v"
+    def container(pid)
+      container_id = DockerPid::Host.docker_container_id(pid)
+      info = DockerPid.container_info(container_id)
+      
+      info[:pid] = pid.to_i
+      info[:container_id] = info[:container_id][0..12]
+      keys = [:pid, :container_id, :name, :image, :ip]
+      values = keys.zip(keys.map{|k| info[k]})
+      print_table values, truncate: true
+    rescue DockerPid::ProcessNotExist => e
+      say("[Error] Process does not exist. (#{e})", Color::RED)
+    rescue DockerPid::NotDockerProcess => e
+      say("[Error] Process is not in docker container. (#{e})", Color::RED)
+    end
+
+  end
+end
+
+DockerPid::CLI.start(ARGV)
