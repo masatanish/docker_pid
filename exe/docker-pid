@@ -14,7 +14,7 @@ module DockerPid
       info = DockerPid.container_info(container_id)
       
       info[:pid] = pid.to_i
-      info[:container_id] = info[:container_id][0..12]
+      info[:container_id] = info[:container_id][0..11]
       keys = [:pid, :container_id, :name, :image, :ip]
       values = keys.zip(keys.map{|k| info[k]})
       print_table values, truncate: true
@@ -24,6 +24,29 @@ module DockerPid
       say("[Error] Process is not in docker container. (#{e})", Color::RED)
     end
 
+    desc "gpuprocesses", "listing processes using gpu"
+    option :verbose, type: :boolean, default: false, aliases: "-v"
+    def gpuprocesses()
+      procs = NvidiaSmi.processes
+      values = []
+      values<< ['PID', 'Process', 'Container ID', 'Container Name', 'Total GPU Mem(MB)', 'Num GPU']
+      procs.map{|p| p.pid }.uniq.each do |pid|
+        pgroup = procs.select{|p| p.pid == pid }
+        proc_name = pgroup.first.name[0...24]
+        gpu_mem = pgroup.map{|p| p.memory}.inject(0, :+)
+        num_gpu = pgroup.size
+        begin
+          cid = DockerPid::Host.docker_container_id(pid)
+          info = DockerPid.container_info(cid)
+          values << [pid, proc_name, cid[0..11], info[:name], gpu_mem, num_gpu]
+        rescue DockerPid::NotDockerProcess => e
+          values << [pid, proc_name,'-', '-', num_gpu, gpu_mem]
+        end
+      end
+      print_table values, truncate: true
+
+
+    end
   end
 end
 

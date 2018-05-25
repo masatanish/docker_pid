@@ -1,6 +1,7 @@
 require 'docker'
 
 require "docker_pid/version"
+require "docker_pid/nvidia_smi"
 
 module DockerPid
   class ProcessNotExist < Exception; end

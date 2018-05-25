@@ -6,8 +6,8 @@ require "docker_pid/version"
 Gem::Specification.new do |spec|
   spec.name          = "docker_pid"
   spec.version       = DockerPid::VERSION
-  spec.authors       = ["masata"]
-  spec.email         = ["nishida@xcompass.com"]
+  spec.authors       = ["masatanish"]
+  spec.email         = ["masatanish@gmail.com"]
 
   spec.summary       = %q{Tool for finding dokcer container ID from pid of host.}
   spec.description   = %q{Tool for finding dokcer container ID from pid of host.}
@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "docker-api", ">= 1.34"
+  spec.add_dependency "nvidia-smi"
   spec.add_dependency "thor"
 
   spec.add_development_dependency "bundler", "~> 1.15"
