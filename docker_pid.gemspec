@@ -32,6 +32,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "docker-api", ">= 1.34"
   spec.add_dependency "nvidia-smi"
+  spec.add_dependency "sys-proctable"
   spec.add_dependency "thor"
 
   spec.add_development_dependency "bundler", "~> 1.15"

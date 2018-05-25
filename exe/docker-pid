@@ -44,8 +44,46 @@ module DockerPid
         end
       end
       print_table values, truncate: true
+    end
 
+    desc "cpuusage", "listing processes using gpu"
+    option :num, type: :numeric, default: 10, aliases: "-v"
+    def cpuusage()
+      procs = DockerPid.ps(options[:num], :pctcpu)
+      values = []
+      values << ['PID', 'Process', 'Container ID', 'Container Name', 'CPU Usage(%)']
+      procs.each do |p|
+        usage = p.pctcpu
+        cmdline = p.cmdline[0..20]
+        begin
+          cid = DockerPid::Host.docker_container_id(p.pid)
+          info = DockerPid.container_info(cid)
+          values << [p.pid, cmdline, cid[0..11], info[:name], usage]
+        rescue DockerPid::NotDockerProcess => e
+          values << [p.pid, cmdline,'-', '-', usage]
+        end
+      end
+      print_table values, truncate: true
+    end
 
+    desc "memusage", "listing processes using gpu"
+    option :num, type: :numeric, default: 10, aliases: "-v"
+    def memusage()
+      procs = DockerPid.ps(options[:num], :pctmem)
+      values = []
+      values << ['PID', 'Process', 'Container ID', 'Container Name', 'MemoryUsage(%)']
+      procs.each do |p|
+        usage = p.pctmem
+        cmdline = p.cmdline[0..20]
+        begin
+          cid = DockerPid::Host.docker_container_id(p.pid)
+          info = DockerPid.container_info(cid)
+          values << [p.pid, cmdline, cid[0..11], info[:name], usage]
+        rescue DockerPid::NotDockerProcess => e
+          values << [p.pid, cmdline,'-', '-', usage]
+        end
+      end
+      print_table values, truncate: true
     end
   end
 end

@@ -1,4 +1,5 @@
 require 'docker'
+require 'sys/proctable'
 
 require "docker_pid/version"
 require "docker_pid/nvidia_smi"
@@ -52,5 +53,9 @@ module DockerPid
       chunks << chunk if stream == :stdout
     end
     chunks.join("\n")
+  end
+
+  def self.ps(num=10, sort_by=:pctcpu)
+    Sys::ProcTable.ps.sort_by{|p| p.send(sort_by) }.reverse[0..num-1]
   end
 end
